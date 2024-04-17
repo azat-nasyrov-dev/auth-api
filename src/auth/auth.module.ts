@@ -5,10 +5,12 @@ import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { UserModule } from '@user/user.module';
 import { options } from './config';
+import { STRATEGIES } from '@auth/strategies';
+import { GUARDS } from '@auth/guards';
 
 @Module({
   imports: [PassportModule, JwtModule.registerAsync(options()), UserModule],
   controllers: [AuthController],
-  providers: [AuthService],
+  providers: [AuthService, ...STRATEGIES, ...GUARDS],
 })
 export class AuthModule {}
