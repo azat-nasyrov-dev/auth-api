@@ -1,22 +1,28 @@
-import { Body, Controller, Delete, Get, Param, ParseUUIDPipe, Post } from '@nestjs/common';
+import {
+  ClassSerializerInterceptor,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  ParseUUIDPipe,
+  UseInterceptors,
+} from '@nestjs/common';
 import { UserService } from '@user/user.service';
+import { UserResponse } from '@user/responses';
 
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @Post()
-  public createUser(@Body() dto) {
-    return this.userService.createUser(dto);
-  }
-
+  @UseInterceptors(ClassSerializerInterceptor)
   @Get(':idOrEmail')
-  public findOne(@Param('idOrEmail') idOrEmail: string) {
-    return this.userService.findOne(idOrEmail);
+  public async findOne(@Param('idOrEmail') idOrEmail: string) {
+    const user = await this.userService.findOne(idOrEmail);
+    return new UserResponse(user);
   }
 
   @Delete(':id')
-  public deleteById(@Param('id', ParseUUIDPipe) id: string) {
+  public async deleteById(@Param('id', ParseUUIDPipe) id: string) {
     return this.userService.deleteById(id);
   }
 }

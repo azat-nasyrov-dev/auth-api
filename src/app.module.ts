@@ -13,7 +13,7 @@ import { JwtAuthGuard } from '@auth/guards/jwt-auth.guard';
     }),
     UserModule,
     PrismaModule,
-    AuthModule
+    AuthModule,
   ],
   providers: [
     {
