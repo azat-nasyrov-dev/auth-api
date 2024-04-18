@@ -9,6 +9,8 @@ import {
 } from '@nestjs/common';
 import { UserService } from '@user/user.service';
 import { UserResponse } from '@user/responses';
+import { CurrentUser } from '@common/decorators';
+import { JwtPayload } from '@auth/types/jwt.interface';
 
 @Controller('user')
 export class UserController {
@@ -22,7 +24,9 @@ export class UserController {
   }
 
   @Delete(':id')
-  public async deleteById(@Param('id', ParseUUIDPipe) id: string) {
-    return this.userService.deleteById(id);
+  public async deleteById(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() user: JwtPayload) {
+    return this.userService.deleteById(id, user);
   }
 }
