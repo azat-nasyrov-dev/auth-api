@@ -24,9 +24,7 @@ export class UserController {
   }
 
   @Delete(':id')
-  public async deleteById(
-    @Param('id', ParseUUIDPipe) id: string,
-    @CurrentUser() user: JwtPayload) {
+  public async deleteById(@Param('id', ParseUUIDPipe) id: string, @CurrentUser() user: JwtPayload) {
     return this.userService.deleteById(id, user);
   }
 }
