@@ -18,7 +18,7 @@ export class UserService {
   ) {}
 
   public createUser(user: Partial<User>) {
-    const hashedPassword = this.hashPassword(user.password);
+    const hashedPassword = user?.password ? this.hashPassword(user.password) : null;
 
     return this.prismaService.user.create({
       data: {
