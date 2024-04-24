@@ -25,6 +25,8 @@ import { GoogleAuthGuard } from '@auth/guards/google-auth.guard';
 import { HttpService } from '@nestjs/axios';
 import { map, mergeMap } from 'rxjs';
 import { handleTimeoutAndError } from '@common/helpers';
+import { YandexAuthGuard } from '@auth/guards/yandex-auth.guard';
+import { Provider } from '@prisma/client';
 
 const REFRESH_TOKEN = 'refreshtoken';
 
@@ -117,15 +119,49 @@ export class AuthController {
   @Get('google/callback')
   public googleAuthCallback(@Req() req: Request, @Res() res: Response) {
     const token = req.user['accessToken'];
-    return res.redirect(`https://localhost:3000/api/auth/success?token=${token}`);
+    return res.redirect(`https://localhost:3000/api/auth/success-google?token=${token}`);
   }
 
-  @Get()
-  public success(@Query('token') token: string, @UserAgent() agent: string, @Res() res: Response) {
+  @Get('success-google')
+  public successGoogle(
+    @Query('token') token: string,
+    @UserAgent() agent: string,
+    @Res() res: Response,
+  ) {
     return this.httpService
       .get(`https://www.googleapis.com/oauth2/v3/tokeninfo?access_token=${token}`)
       .pipe(
-        mergeMap(({ data: { email } }) => this.authService.googleAuth(email, agent)),
+        mergeMap(({ data: { email } }) =>
+          this.authService.providerAuth(email, agent, Provider.GOOGLE),
+        ),
+        map((data) => this.setRefreshTokenToCookies(data, res)),
+        handleTimeoutAndError(),
+      );
+  }
+
+  @UseGuards(YandexAuthGuard)
+  @Get('yandex')
+  public yandexAuth() {}
+
+  @UseGuards(YandexAuthGuard)
+  @Get('yandex/callback')
+  public yandexAuthCallback(@Req() req: Request, @Res() res: Response) {
+    const token = req.user['accessToken'];
+    return res.redirect(`https://localhost:3000/api/auth/success-yandex?token=${token}`);
+  }
+
+  @Get('success-yandex')
+  public successYandex(
+    @Query('token') token: string,
+    @UserAgent() agent: string,
+    @Res() res: Response,
+  ) {
+    return this.httpService
+      .get(`https://login.yandex.ru/info?format=json&oauth_token=${token}`)
+      .pipe(
+        mergeMap(({ data: { default_email } }) =>
+          this.authService.providerAuth(default_email, agent, Provider.YANDEX),
+        ),
         map((data) => this.setRefreshTokenToCookies(data, res)),
         handleTimeoutAndError(),
       );
