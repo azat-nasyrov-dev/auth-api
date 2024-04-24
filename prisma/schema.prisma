@@ -16,6 +16,7 @@ model User {
   updatedAt DateTime  @updatedAt @map("updated_at")
   roles     Role[]
   Token     Token[]
+  isBlocked Boolean   @default(false) @map("is_blocked")
 
   @@map("users")
 }
