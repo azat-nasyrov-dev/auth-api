@@ -69,15 +69,9 @@ export class AuthService {
   }
 
   public async refreshTokens(refreshToken: string, agent: string): Promise<Tokens> {
-    const token = await this.prismaService.token.findUnique({ where: { token: refreshToken } });
+    const token = await this.prismaService.token.delete({ where: { token: refreshToken } });
 
-    if (!token) {
-      throw new UnauthorizedException();
-    }
-
-    await this.prismaService.token.delete({ where: { token: refreshToken } });
-
-    if (new Date(token.exp) < new Date()) {
+    if (!token || new Date(token.exp) < new Date()) {
       throw new UnauthorizedException();
     }
 
